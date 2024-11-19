@@ -5,12 +5,13 @@ namespace Lab2;
 
 using System.Text;
 
-public class CustomSet<T> : IEnumerable<T>
+public class CustomSet<T> : ICollection<T>
 {
     private const int DefaultCapacity = 4;
 
     private T[] _items = new T[DefaultCapacity];
     private int _size = 0;
+
     public CustomSet()
     {
     }
@@ -19,7 +20,7 @@ public class CustomSet<T> : IEnumerable<T>
     {
         AddAll(items);
     }
-    
+
     public int Capacity
     {
         get => _items.Length;
@@ -59,6 +60,7 @@ public class CustomSet<T> : IEnumerable<T>
     }
 
     public int Count => _size;
+    public bool IsReadOnly => false;
 
     private int _version;
 
@@ -108,6 +110,11 @@ public class CustomSet<T> : IEnumerable<T>
 
     public int IndexOf(T item)
         => Array.IndexOf(_items, item, 0, _size);
+
+    public void CopyTo(T[] array, int arrayIndex)
+    {
+        Array.Copy(_items, 0, array, arrayIndex, _size);
+    }
 
     public bool Remove(T item)
     {
@@ -236,7 +243,7 @@ public class CustomSet<T> : IEnumerable<T>
 
         return newSet;
     }
-    
+
     public static bool operator false(CustomSet<T> set)
     {
         return set._size < 1;

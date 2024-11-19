@@ -305,10 +305,10 @@ namespace Lab2.Tests
         public void SetCapacity_ToZero_ResetsItemsArray()
         {
             var set = new CustomSet<int>();
-            
+
             set.Capacity = 0;
-            
-            Assert.AreEqual(0, set.Count); 
+
+            Assert.AreEqual(0, set.Count);
             Assert.AreEqual(0, set.Capacity);
         }
 
@@ -380,6 +380,53 @@ namespace Lab2.Tests
 
             set.Add(3);
             Assert.ThrowsException<InvalidOperationException>(() => enumerator.Reset());
+        }
+
+        [TestMethod]
+        public void IsReadOnly_AlwaysFalse()
+        {
+            var set = new CustomSet<int>();
+
+            Assert.IsFalse(set.IsReadOnly);
+        }
+
+        [TestMethod]
+        public void CopyTo_NullDestination_ThrowsException()
+        {
+            var set = new CustomSet<int>();
+
+            Assert.IsFalse(set.IsReadOnly);
+        }
+
+        [TestMethod]
+        public void CopyTo_EmptySet_TargetArrayUnchanged()
+        {
+            var set = new CustomSet<int>();
+            var targetArray = new int[5];
+
+            set.CopyTo(targetArray, 0);
+
+            CollectionAssert.AreEqual(new[] { 0, 0, 0, 0, 0 }, targetArray);
+        }
+
+        [TestMethod]
+        public void CopyTo_SetWithElements_CopiesCorrectly()
+        {
+            var set = new CustomSet<int> { 1, 2, 3 };
+            var targetArray = new int[5];
+
+            set.CopyTo(targetArray, 1);
+
+            CollectionAssert.AreEqual(new[] { 0, 1, 2, 3, 0 }, targetArray);
+        }
+
+        [TestMethod]
+        public void CopyTo_TargetArrayTooSmall_ThrowsException()
+        {
+            var set = new CustomSet<int> { 1, 2, 3 };
+            var targetArray = new int[2];
+
+            Assert.ThrowsException<ArgumentException>(() => set.CopyTo(targetArray, 0));
         }
     }
 }
