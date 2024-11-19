@@ -11,6 +11,15 @@ public class CustomSet<T> : IEnumerable<T>
 
     private T[] _items = new T[DefaultCapacity];
     private int _size = 0;
+    public CustomSet()
+    {
+    }
+
+    public CustomSet(IEnumerable<T> items)
+    {
+        AddAll(items);
+    }
+    
     public int Capacity
     {
         get => _items.Length;
@@ -30,6 +39,7 @@ public class CustomSet<T> : IEnumerable<T>
                     {
                         Array.Copy(_items, newItems, _size);
                     }
+
                     _items = newItems;
                 }
                 else
@@ -38,15 +48,6 @@ public class CustomSet<T> : IEnumerable<T>
                 }
             }
         }
-    }
-
-    public CustomSet()
-    {
-    }
-
-    public CustomSet(IEnumerable<T> items)
-    {
-        AddAll(items);
     }
 
     public void AddAll(IEnumerable<T> items)
@@ -222,7 +223,7 @@ public class CustomSet<T> : IEnumerable<T>
 
     public static explicit operator int(CustomSet<T> set) => set.Count;
 
-    public static CustomSet<T> operator *(CustomSet<T> first, CustomSet<T>  second)
+    public static CustomSet<T> operator *(CustomSet<T> first, CustomSet<T> second)
     {
         var newSet = new CustomSet<T>();
         foreach (var x1 in first)
@@ -234,6 +235,16 @@ public class CustomSet<T> : IEnumerable<T>
         }
 
         return newSet;
+    }
+    
+    public static bool operator false(CustomSet<T> set)
+    {
+        return set._size < 1;
+    }
+
+    public static bool operator true(CustomSet<T> set)
+    {
+        return set._size >= 1;
     }
 
     private struct Enumerator : IEnumerator<T>
