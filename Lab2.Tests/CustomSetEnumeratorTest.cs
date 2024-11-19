@@ -1,5 +1,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace Lab2.Tests;
 
 [TestClass]
@@ -8,7 +11,6 @@ public class CustomSetEnumeratorTests
     [TestMethod]
     public void Enumerator_MoveNext_IteratesCorrectly()
     {
-        // Arrange
         var set = new CustomSet<int>();
         set.Add(1);
         set.Add(2);
@@ -25,7 +27,7 @@ public class CustomSetEnumeratorTests
         Assert.IsTrue(enumerator.MoveNext());
         Assert.AreEqual(3, enumerator.Current);
 
-        Assert.IsFalse(enumerator.MoveNext()); // No more items, should return false
+        Assert.IsFalse(enumerator.MoveNext());
     }
 
     [TestMethod]
@@ -35,14 +37,12 @@ public class CustomSetEnumeratorTests
         var set = new CustomSet<int>();
         set.Add(1);
         set.Add(2);
-        var enumerator = set.GetEnumerator();
+        using var enumerator = set.GetEnumerator();
 
-        // Act
-        enumerator.MoveNext(); // Move to the first element
-        enumerator.Reset(); // Reset the enumerator
+        enumerator.MoveNext();
+        enumerator.Reset();
 
-        // Assert
-        Assert.IsTrue(enumerator.MoveNext()); // Should start from the beginning
+        Assert.IsTrue(enumerator.MoveNext());
         Assert.AreEqual(1, enumerator.Current);
     }
 
@@ -51,41 +51,29 @@ public class CustomSetEnumeratorTests
     {
         var set = new CustomSet<int>();
         set.Add(1);
-        var enumerator = set.GetEnumerator();
+        using var enumerator = set.GetEnumerator();
 
-        Assert.ThrowsException<InvalidOperationException>(() =>
-        {
-            var invalidCurrent = enumerator.Current;
-        });
+        Assert.ThrowsException<InvalidOperationException>(() => enumerator.Current);
 
         enumerator.MoveNext();
         Assert.AreEqual(1, enumerator.Current);
 
         enumerator.MoveNext();
-        Assert.ThrowsException<InvalidOperationException>(() =>
-        {
-            var invalidCurrent = enumerator.Current;
-        });
+        Assert.ThrowsException<InvalidOperationException>(() => enumerator.Current);
     }
 
     [TestMethod]
     public void Enumerator_VersionMismatch_ThrowsException()
     {
-        // Arrange
         var set = new CustomSet<int>();
         set.Add(1);
         set.Add(2);
-        var enumerator = set.GetEnumerator();
+        using var enumerator = set.GetEnumerator();
 
-        // Act
-        enumerator.MoveNext(); // Start iteration
-        set.Add(3); // Modify the set
+        enumerator.MoveNext();
+        set.Add(3);
 
-        // Assert
-        Assert.ThrowsException<InvalidOperationException>(() =>
-        {
-            enumerator.MoveNext(); // Should fail due to version mismatch
-        });
+        Assert.ThrowsException<InvalidOperationException>(() => enumerator.MoveNext());
     }
 
     [TestMethod]
@@ -96,20 +84,38 @@ public class CustomSetEnumeratorTests
         set.Add(1);
         var enumerator = set.GetEnumerator();
 
-        // Act & Assert
-        enumerator.Dispose(); // Should be a no-op, just ensure no exceptions are thrown
-        Assert.IsTrue(enumerator.MoveNext()); // Enumerator should still work
+        enumerator.Dispose();
+        Assert.IsTrue(enumerator.MoveNext());
         Assert.AreEqual(1, enumerator.Current);
     }
 
     [TestMethod]
     public void Enumerator_EmptySet_ReturnsFalseOnMoveNext()
     {
-        // Arrange
         var set = new CustomSet<int>();
-        var enumerator = set.GetEnumerator();
+        using var enumerator = set.GetEnumerator();
 
-        // Act & Assert
-        Assert.IsFalse(enumerator.MoveNext()); // MoveNext should return false on empty set
+        Assert.IsFalse(enumerator.MoveNext());
     }
+    
+    [TestMethod]
+    public void IEnumerableGetEnumerator_ReturnsEnumerator()
+    {
+        var set = new CustomSet<int> { 1, 2, 3 };
+        IEnumerable enumerableSet = set;
+
+        var enumerator = enumerableSet.GetEnumerator();
+
+        Assert.IsNotNull(enumerator);
+        Assert.IsTrue(enumerator is IEnumerator);
+    
+        var elements = new List<int>();
+        while (enumerator.MoveNext())
+        {
+            elements.Add((int)enumerator.Current!);
+        }
+        CollectionAssert.AreEquivalent(new[] { 1, 2, 3 }, elements);
+        enumerator.Reset();
+    }
+
 }
